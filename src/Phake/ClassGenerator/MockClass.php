@@ -619,7 +619,7 @@ class {$newClassName} {$extends}
                 $type = $parameter->getType() . ' ';
             }
 
-            if (method_exists($parameter, 'hasType') && $parameter->hasType() && $parameter->allowsNull()) {
+            if (version_compare(PHP_VERSION, '7.1.0') >= 0 && method_exists($parameter, 'hasType') && $parameter->hasType() && $parameter->allowsNull()) {
                 // a parameter can have a type hint and a default value of null without being a 7.1 nullable type hint
                 if (!($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)) {
                     $type = '?'.$type;
