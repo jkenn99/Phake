@@ -54,6 +54,20 @@ class Phake_Stubber_Answers_SmartDefaultAnswer implements Phake_Stubber_IAnswer
 
     }
 
+    /**
+     * Retrieves the name of the type.  Will adjust the method of retrieval based on PHP version.
+     *
+     * @return string
+     */
+    protected function getReturnTypeName($returnType)
+    {
+        if (version_compare(phpversion(), '7.1.0', '<')) 
+        {
+            return (string)$returnType;
+        }
+        return $returnType->getName();
+    }
+
     public function getAnswerCallback($context, $method)
     {
         $class = new ReflectionClass($context);
@@ -63,7 +77,8 @@ class Phake_Stubber_Answers_SmartDefaultAnswer implements Phake_Stubber_IAnswer
 
         if (method_exists($method, 'hasReturnType') && $method->hasReturnType())
         {
-            switch ((string)$method->getReturnType())
+            $returnTypeName = $this->getReturnTypeName($method->getReturnType());
+            switch ($returnTypeName)
             {
                 case 'int':
                     $defaultAnswer = 0;
@@ -84,9 +99,9 @@ class Phake_Stubber_Answers_SmartDefaultAnswer implements Phake_Stubber_IAnswer
                     $defaultAnswer = function () {};
                     break;
                 default:
-                    if (class_exists((string)$method->getReturnType()))
+                    if (class_exists($returnTypeName))
                     {
-                        $defaultAnswer = Phake::mock((string)$method->getReturnType());
+                        $defaultAnswer = Phake::mock($returnTypeName);
                     }
                     break;
             }

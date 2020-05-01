@@ -454,6 +454,20 @@ class {$newClassName} {$extends}
     }
 
     /**
+     * Retrieves the name of the type.  Will adjust the method of retrieval based on PHP version.
+     *
+     * @return string
+     */
+    protected function getReturnTypeName($returnType)
+    {
+        if (version_compare(phpversion(), '7.1.0', '<')) 
+        {
+            return (string)$returnType;
+        }
+        return $returnType->getName();
+    }
+
+    /**
      * Creates the implementation of a single method
      *
      * @param ReflectionMethod $method
@@ -486,7 +500,7 @@ class {$newClassName} {$extends}
         if (method_exists($method, 'hasReturnType') && $method->hasReturnType())
         {
             $returnType = $method->getReturnType();
-            $returnTypeName = (string)$returnType;
+            $returnTypeName = $this->getReturnTypeName($returnType);
 
             if ($returnTypeName == 'self')
             {
@@ -616,7 +630,7 @@ class {$newClassName} {$extends}
                 $type = $parameter->getClass()->getName() . ' ';
             } elseif (method_exists($parameter, 'hasType') && $parameter->hasType())
             {
-                $type = $parameter->getType() . ' ';
+                $type = $this->getReturnTypeName($parameter->getType()) . ' ';
             }
 
             if (version_compare(PHP_VERSION, '7.1.0') >= 0 && method_exists($parameter, 'hasType') && $parameter->hasType() && $parameter->allowsNull()) {
